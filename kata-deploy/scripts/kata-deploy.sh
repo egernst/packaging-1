@@ -34,7 +34,7 @@ function install_artifacts() {
 	chmod +x /opt/kata/bin/*
 }
 
-function configure_cri_runtime() {
+function configure_runtime() {
 	echo "Add Kata Containers as a supported runtime:"
 	case $1 in
 	crio)
@@ -43,9 +43,13 @@ function configure_cri_runtime() {
 	containerd)
 		configure_containerd
 		;;
+
+	docker)
+		configure_docker
+		;;
 	esac
 	systemctl daemon-reload
-	systemctl restart crio
+	systemctl restart $1
 }
 
 function configure_crio() {
@@ -89,12 +93,16 @@ function configure_containerd() {
 EOT
 }
 
+function configure_docker() {
+	echo "configuring docker"
+}
+
 function remove_artifacts() {
 	echo "deleting kata artifacts"
 	rm -rf /opt/kata/
 }
 
-function cleanup_cri_runtime() {
+function cleanup_runtime() {
 	case $1 in
 	crio)
 		cleanup_crio
@@ -102,9 +110,13 @@ function cleanup_cri_runtime() {
 	containerd)
 		cleanup_containerd
 		;;
+	docker)
+		cleanup_docker
+		;;
 	esac
 
 }
+
 function cleanup_crio() {
 	if [ -f /etc/crio/crio.conf.bak ]; then
 		mv /etc/crio/crio.conf.bak /etc/crio/crio.conf
@@ -119,14 +131,11 @@ function cleanup_containerd() {
 
 }
 
-function reset_runtime() {
-	kubectl label node $NODE_NAME kata-containers.io/container-runtime- kata-containers.io/kata-runtime-
-	systemctl daemon-reload
-	systemctl restart $1
-	systemctl restart kubelet
+function cleanup_docker() {
+	echo "cleanup docker"
 }
 
-function action() {
+function main() {
 
 	# script requires that user is root
 	euid=`id -u`
@@ -134,24 +143,56 @@ function action() {
 	   die  "This script must be run as root"
 	fi
 
-	runtime=$(get_container_runtime)
+	configureDocker="false"
+	while getopts "d" opt; do
+		case "$opt" in
+		d)
+			configureDocker="true"
+			shift $((OPTIND - 1))
+			;;
+		esac
+	done
+
+	action=${1:-}
+	if [ -z $action ]; then 
+		print_usage
+		die "invalid arguments"	
+	fi	
+
+
+	if [ $configureDocker == "true" ] ; then
+		runtime="docker"
+	else
+		runtime=$(get_container_runtime)
+	fi		
+
+	echo configureDocker: $configureDocker
 
 	# only install / remove / update if we are dealing with CRIO or containerd
-	if [ "$runtime" == "cri-o" ] || [ "$runtime" == "containerd" ]; then
+	if [ "$runtime" == "cri-o" ] || [ "$runtime" == "containerd" ] || [ "$runtime" == "docker" ] ; then
 
 		case $1 in
 		install)
 
 			install_artifacts
-			configure_cri_runtime $runtime
+			configure_runtime $runtime
 			;;
 		cleanup)
 			remove_artifacts
-			cleanup_cri_runtime $runtime
-			kubectl label node $NODE_NAME --overwrite kata-containers.io/kata-runtime=cleanup
+			cleanup_runtime $runtime
+			if [ $configureDocker == "false" ]; then
+				kubectl label node $NODE_NAME --overwrite kata-containers.io/kata-runtime=cleanup
+			fi
 			;;
 		reset)
-			reset_runtime $runtime
+
+			if [ $configureDocker == "false" ]; then
+				kubectl label node $NODE_NAME kata-containers.io/container-runtime- kata-containers.io/kata-runtime-
+			else
+				echo "resetting for docker"
+			fi
+			systemctl daemon-reload
+			systemctl restart $runtime
 			;;
 		*)
 			echo invalid arguments
@@ -162,7 +203,9 @@ function action() {
 
 	#It is assumed this script will be called as a daemonset. As a result, do
         # not return, otherwise the daemon will restart and rexecute the script
-	sleep infinity
+	if [ $configureDocker == "false" ]; then
+		sleep infinity
+	fi
 }
 
-action $1
+main $@
