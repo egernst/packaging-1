@@ -1,18 +1,19 @@
 # kata-deploy
 
-
 - [kata-deploy](#kata-deploy)
-  * [Quick start](#quick-start-)
+  * [Docker quick start:](#docker-quick-start-)
+    + [Install Kata and configure Docker](#install-kata-and-configure-docker)
+    + [Run a sample workload utilizing Kata containers:](#run-a-sample-workload-utilizing-kata-containers-)
+    + [Remove Kata](#remove-kata)
+  * [Kubernetes quick start](#kubernetes-quick-start)
     + [Install Kata on a running Kubernetes cluster](#install-kata-on-a-running-kubernetes-cluster)
-    + [Run a sample workload](#run-a-sample-workload-)
-    + [Remove Kata from the Kubernetes cluster](#remove-kata-from-the-kubernetes-cluster-)
-  * [kata-deploy details](#kata-deploy-details)
+    + [Run a sample workload](#run-a-sample-workload)
+    + [Remove Kata from the Kubernetes cluster](#remove-kata-from-the-kubernetes-cluster)
+  * [kata-deploy Details](#kata-deploy-details)
     + [Dockerfile](#dockerfile)
-    + [Daemonsets and RBAC](#daemonsets-and-rbac-)
-      - [runtime-labeler](#runtime-labeler-)
-      - [CRI-O and containerd kata installer](#cri-o-and-containerd-kata-installer-)
-    + [Kata cleanup](#kata-cleanup-)
-
+    + [Daemonsets and RBAC:](#daemonsets-and-rbac-)
+      - [Kata installer: kata-deploy](#kata-installer--kata-deploy)
+    + [Kata cleanup:](#kata-cleanup-)
 
 [kata-deploy](kata-deploy) provides a Dockerfile, which contains all of the binaries
 and artifacts required to run Kata Containers, as well as reference daemonsets, which can
