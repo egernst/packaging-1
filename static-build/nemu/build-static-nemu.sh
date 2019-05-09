@@ -42,6 +42,8 @@ if [ -z "$nemu_ovmf_version" ]; then
 	[ -n "$nemu_ovmf_version" ] || die "failed to get nemu ovmf version"
 fi
 
+nemu_virtiofsd_binary="virtiofsd-x86_64"
+nemu_virtiofsd_release="${nemu_repo}/releases/download/${nemu_version}/${nemu_virtiofsd_binary}"
 nemu_ovmf_release="${nemu_ovmf_repo}/releases/download/${nemu_ovmf_version}/OVMF.fd"
 info "Build ${nemu_repo} version: ${nemu_version}"
 
@@ -54,6 +56,8 @@ docker build \
 	--build-arg NEMU_REPO="${nemu_repo}" \
 	--build-arg NEMU_VERSION="${nemu_version}" \
 	--build-arg NEMU_OVMF="${nemu_ovmf_release}" \
+	--build-arg VIRTIOFSD_RELEASE="${nemu_virtiofsd_release}" \
+	--build-arg VIRTIOFSD="${nemu_virtiofsd_binary}" \
 	"${config_dir}" \
 	-f "${script_dir}/Dockerfile" \
 	-t nemu-static
