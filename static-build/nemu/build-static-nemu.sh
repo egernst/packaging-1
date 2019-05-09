@@ -16,6 +16,7 @@ config_dir="${script_dir}/../../scripts/"
 
 nemu_repo="${nemu_repo:-}"
 nemu_version="${nemu_version:-}"
+nemu_release_url="${nemu_release_url:-}"
 nemu_ovmf_repo="${nemu_ovmf_repo:-}"
 nemu_ovmf_version="${nemu_ovmf_version:-}"
 
@@ -31,6 +32,7 @@ fi
 [ -n "$nemu_version" ] || die "failed to get nemu version"
 
 
+
 if [ -z "$nemu_ovmf_repo" ]; then
 	info "Get nemu information from runtime versions.yaml"
 	nemu_ovmf_repo=$(get_from_kata_deps "assets.hypervisor.nemu-ovmf.url")
@@ -39,6 +41,11 @@ fi
 
 if [ -z "$nemu_ovmf_version" ]; then
 	nemu_ovmf_version=$(get_from_kata_deps "assets.hypervisor.nemu-ovmf.version")
+	[ -n "$nemu_ovmf_version" ] || die "failed to get nemu ovmf version"
+fi
+
+if [ -z "$nemu_release_url" ]; then
+	nemu_release_url= $(get_from_kata_deps "assets.hypervisor.nemu-ovmf.version")
 	[ -n "$nemu_ovmf_version" ] || die "failed to get nemu ovmf version"
 fi
 
