@@ -1,0 +1,13 @@
+# action.yml
+name: 'kata-deploy-in-k3s'
+description: 'test Kata container artifacts on K3S cluster on AZ VM'
+inputs:
+  packaging-sha:
+    description: 'SHA we are using for pulling packaing manifests, packaging repo'
+    required: true
+    default: ''
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.packaging-sha }}
