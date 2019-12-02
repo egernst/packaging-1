@@ -1,5 +1,5 @@
 # action.yml
-name: 'kata-deploy'
+name: 'kata-deploy-aks'
 description: 'test Kata container image in AKS'
 inputs:
   packaging-sha:
