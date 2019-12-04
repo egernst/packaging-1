@@ -25,7 +25,7 @@ RUN curl -LO https://github.com/Azure/aks-engine/releases/download/${AKS_ENGINE_
   && mv aks-engine-${AKS_ENGINE_VER}-linux-${ARCH}/aks-engine /usr/local/bin/aks-engine \
   && rm aks-engine-${AKS_ENGINE_VER}-linux-${ARCH}.tar.gz
 
-COPY kubernetes-containerd.json /
-COPY setup-aks.sh test-kata.sh entrypoint.sh /
+COPY aks/kubernetes-containerd.json /
+COPY aks/setup-aks.sh test-kata.sh aks/entrypoint.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]
