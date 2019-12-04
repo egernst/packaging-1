@@ -8,12 +8,6 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-#### HORRIBLE: LOCAL SECRET: DELETE PLS #####
-export AZ_APPID=961b1180-855f-4433-becc-16ec843c7579
-export AZ_PASSWORD=487316dc-a838-4941-b7f8-ac28b6a00955
-export AZ_SUBSCRIPTION_ID=2efae366-54ff-4d92-b51e-7454e50408e3
-export AZ_TENANT_ID=bda2b831-bb6b-41a2-b562-fc7ab1b8bd07
-
 LOCATION=${LOCATION:-westus2}
 #DNS_PREFIX=${DNS_PREFIX:-kata-deploy-${GITHUB_SHA:0:10}}
 DNS_PREFIX="test-kata-2"
