@@ -35,23 +35,6 @@ jobs:
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker push katadocker/kata-deploy-ci:$GITHUB_SHA
 
-  test-on-aks:
-    needs: create-test-container
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: set-pkg-env
-        run: |
-                echo ::set-env name=PKG_SHA::${GITHUB_SHA}
-      - name: test-kata-deploy-in-aks
-        uses: ./kata-deploy/actions/aks
-        env:
-          PKG_SHA: ${{ env.PKG_SHA }}
-          AZ_APPID: ${{ secrets.AZ_APPID }}
-          AZ_PASSWORD: ${{ secrets.AZ_PASSWORD }}
-          AZ_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          AZ_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
-
   test-on-az:
     needs: create-test-container
     runs-on: ubuntu-latest
