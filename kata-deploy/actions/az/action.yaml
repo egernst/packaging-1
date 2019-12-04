@@ -1,0 +1,13 @@
+# action.yml
+name: 'kata-deploy-on-az-vm'
+description: 'test Kata container image in single node K8S on AZ VM'
+inputs:
+  packaging-sha:
+    description: 'SHA we are using for pulling packaing manifests'
+    required: true
+    default: ''
+runs:
+  using: 'docker'
+  image: '../Dockerfile-az'
+  args:
+    - ${{ inputs.packaging-sha }}
