@@ -50,7 +50,7 @@ function setup_az() {
 		--generate-ssh-keys )
 
 	publicIP=$(echo $result | jq -r '.publicIpAddress')
-
+	set -x
 	echo $result
 	echo $publicIP
 
