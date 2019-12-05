@@ -43,6 +43,7 @@ jobs:
       - name: set-pkg-env
         run: |
                 echo ::set-env name=PKG_SHA::${GITHUB_SHA}
+                ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -N '' 
       - name: test-kata-deploy-in-aks
         uses: ./kata-deploy/actions/az
         env:

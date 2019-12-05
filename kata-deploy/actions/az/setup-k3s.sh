@@ -18,7 +18,6 @@ function die() {
 }
 
 function destroy_k3s() {
-	set +x
 
 	az login --service-principal -u "$AZ_APPID" -p "$AZ_PASSWORD" --tenant "$AZ_TENANT_ID"
 	az group delete --name "$DNS_PREFIX" --yes --no-wait
@@ -26,7 +25,6 @@ function destroy_k3s() {
 }
 
 function setup_k3s() {
-	set +x
 
 	[[ -z "$AZ_APPID" ]] && die "no Azure service principal ID provided"
 	[[ -z "$AZ_PASSWORD" ]] && die "no Azure service principal secret provided"
