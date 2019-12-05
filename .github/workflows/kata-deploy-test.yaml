@@ -28,8 +28,8 @@ jobs:
         run: |
             echo "will see this?" $(git log --oneline -n1)
             echo "can I see the env" $(env)
-            echo "path to ENV file:" $GITHUB_ENV_PATH
-            echo "Will I see output of cat'ing this file: " $(cat $GITHUB_ENV_PATH)
+            echo "path to ENV file:" $GITHUB_EVENT_PATH
+            echo "Will I see output of cat'ing this file: " $(cat $GITHUB_EVENT_PATH)
             echo "oh that was fun"
             VERSION=$(curl https://raw.githubusercontent.com/kata-containers/runtime/master/VERSION)
             ARTIFACT_URL="https://github.com/kata-containers/runtime/releases/download/${VERSION}/kata-static-${VERSION}-x86_64.tar.xz"
