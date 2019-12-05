@@ -55,7 +55,7 @@ function setup_k3s() {
 		--image UbuntuLTS \
 		--nsg k3s-nsg \
 		--admin-username kata \
-		--ssh-key-path $PWD/id_rsa.pub )
+		--ssh-key-values ./id_rsa.pub )
 	masterIP=$(echo $result | jq -r '.publicIpAddress')
 
 	result=$(az vm create \
@@ -65,7 +65,7 @@ function setup_k3s() {
 		--image UbuntuLTS \
 		--nsg k3s-nsg \
 		--admin-username kata \
-		--ssh-key-path $PWD/id_rsa.pub )
+		--ssh-key-values ./id_rsa.pub )
 	workerIP=$(echo $result | jq -r '.publicIpAddress')
 
 	set -x
@@ -76,8 +76,8 @@ function setup_k3s() {
 
 	#james, don't look at this next line:
 	curl -sLS https://raw.githubusercontent.com/alexellis/k3sup/master/get.sh | sh
-	k3sup  install --ip $masterIP --user kata --ssh-key $PWD/id_rsa
-	k3sup join --ip ${workerIP} --server-ip ${masterIP} --user kata --ssh-key $PWD/id_rsa
+	k3sup  install --ip $masterIP --user kata --ssh-key ./id_rsa
+	k3sup join --ip ${workerIP} --server-ip ${masterIP} --user kata --ssh-key ./id_rsa.pub
 
 	export KUBECONFIG=$PWD/kubeconfig
 }
