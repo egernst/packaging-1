@@ -30,12 +30,13 @@ jobs:
             echo "can I see the env" $(env)
             echo "path to ENV file:" $GITHUB_EVENT_PATH
             echo "Will I see output of cat'ing this file: " $(cat $GITHUB_EVENT_PATH)
+            pr_url=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.url')
+            ref=$(curl -s -X GET ${pr_url} | jq -r '.head.ref'
+            sha=$(curl -s -X GET ${pr_url} | jq -r '.head.sha'
+            label=$(curl -s -X GET ${pr_url} | jq -r '.head.label'
+            echo "ref, sha, label: " $ref ", " $sha ", " $label
             echo "oh that was fun"
             VERSION=$(curl https://raw.githubusercontent.com/kata-containers/runtime/master/VERSION)
             ARTIFACT_URL="https://github.com/kata-containers/runtime/releases/download/${VERSION}/kata-static-${VERSION}-x86_64.tar.xz"
             echo $(ls)
             echo $(pwd)
-            wget "${ARTIFACT_URL}" -O ./kata-deploy/kata-static.tar.xz
-            docker build --build-arg KATA_ARTIFACTS=kata-static.tar.xz -t katadocker/kata-deploy-ci:${GITHUB_SHA} ./kata-deploy
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker push katadocker/kata-deploy-ci:$GITHUB_SHA
