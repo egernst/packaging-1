@@ -46,7 +46,8 @@ function setup_k3s() {
 
 	# create key for the nodes. In GHActions, we cannot modify default keys (~/.ssh/), so we need to generate
 	# our own at an acceptable location
-	ssh-keygen -f id_rsa -t rsa -N ''
+	KEY_PATH=/tmp/id_rsa
+	ssh-keygen -f ${KEY_PATH} -t rsa -N ''
 
 	result=$(az vm create \
 		--resource-group ${DNS_PREFIX} \
@@ -55,7 +56,7 @@ function setup_k3s() {
 		--image UbuntuLTS \
 		--nsg k3s-nsg \
 		--admin-username kata \
-		--ssh-key-values ./id_rsa.pub )
+		--ssh-key-values ${KEY_PATH}.pub )
 	masterIP=$(echo $result | jq -r '.publicIpAddress')
 
 	result=$(az vm create \
@@ -65,7 +66,7 @@ function setup_k3s() {
 		--image UbuntuLTS \
 		--nsg k3s-nsg \
 		--admin-username kata \
-		--ssh-key-values ./id_rsa.pub )
+		--ssh-key-values ${KEY_PATH}.pub )
 	workerIP=$(echo $result | jq -r '.publicIpAddress')
 
 	set -x
@@ -76,8 +77,8 @@ function setup_k3s() {
 
 	#james, don't look at this next line:
 	curl -sLS https://raw.githubusercontent.com/alexellis/k3sup/master/get.sh | sh
-	k3sup  install --ip $masterIP --user kata --ssh-key ./id_rsa
-	k3sup join --ip ${workerIP} --server-ip ${masterIP} --user kata --ssh-key ./id_rsa.pub
+	k3sup  install --ip $masterIP --user kata --ssh-key ${KEY_PATH}
+	k3sup join --ip ${workerIP} --server-ip ${masterIP} --user kata --ssh-key ${KEY_PATH}
 
 	export KUBECONFIG=$PWD/kubeconfig
 }
