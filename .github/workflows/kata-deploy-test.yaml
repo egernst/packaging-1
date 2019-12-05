@@ -39,11 +39,15 @@ jobs:
     needs: create-test-container
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2-beta
+        with:
+         ref: ${{ github.event.after }}
       - name: set-pkg-env
         run: |
                 echo "will see this?" $(git log -n1)
                 cat $GITHUB_ENV_PATH
+                cat /github/workflow/event.json
+                echo "who hates me and won't let me do what i want for cawe;foiajwefawef" 
                 echo ::set-env name=PKG_SHA::${GITHUB_SHA}
                 ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -N '' 
       - name: test-kata-deploy-in-aks
