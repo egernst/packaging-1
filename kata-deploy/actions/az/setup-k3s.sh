@@ -9,7 +9,7 @@ set -o pipefail
 set -o nounset
 
 LOCATION=${LOCATION:-westus2}
-DNS_PREFIX="kata-k3s"
+DNS_PREFIX=${DNS_PREFIX:-kata-deploy-${GITHUB_SHA:0:10}}
 
 function die() {
 	msg="$*"
@@ -44,6 +44,10 @@ function setup_k3s() {
 	az network nsg rule create --name ssh-access --nsg-name k3s-nsg --resource-group ${DNS_PREFIX} --priority 100 --access Allow --source-address-prefixes '*' --source-port-ranges '*' --destination-address-prefixes '*' --destination-port-ranges 22 --protocol Tcp
 	az network nsg rule create --name access-api-server --nsg-name k3s-nsg --resource-group ${DNS_PREFIX} --priority 101 --access Allow --source-address-prefixes '*' --source-port-ranges '*' --destination-address-prefixes '*' --destination-port-ranges 6443 --protocol Tcp
 
+	# create key for the nodes. In GHActions, we cannot modify default keys (~/.ssh/), so we need to generate
+	# our own at an acceptable location
+	ssh-keygen -f id_rsa -t rsa -N ''
+
 	result=$(az vm create \
 		--resource-group ${DNS_PREFIX} \
 		--size Standard_D4S_v3 \
@@ -51,7 +55,7 @@ function setup_k3s() {
 		--image UbuntuLTS \
 		--nsg k3s-nsg \
 		--admin-username kata \
-		--generate-ssh-keys )
+		--ssh-key-path $PWD/id_rsa.pub )
 	masterIP=$(echo $result | jq -r '.publicIpAddress')
 
 	result=$(az vm create \
@@ -61,7 +65,7 @@ function setup_k3s() {
 		--image UbuntuLTS \
 		--nsg k3s-nsg \
 		--admin-username kata \
-		--generate-ssh-keys )
+		--ssh-key-path $PWD/id_rsa.pub )
 	workerIP=$(echo $result | jq -r '.publicIpAddress')
 
 	set -x
@@ -72,6 +76,8 @@ function setup_k3s() {
 
 	#james, don't look at this next line:
 	curl -sLS https://raw.githubusercontent.com/alexellis/k3sup/master/get.sh | sh
-	k3sup  install --ip $masterIP --user kata
-	k3sup join --ip ${workerIP} --server-ip ${masterIP} --user kata
+	k3sup  install --ip $masterIP --user kata --ssh-key $PWD/id_rsa
+	k3sup join --ip ${workerIP} --server-ip ${masterIP} --user kata --ssh-key $PWD/id_rsa
+
+	export KUBECONFIG=$PWD/kubeconfig
 }
