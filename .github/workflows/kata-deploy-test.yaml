@@ -26,6 +26,11 @@ jobs:
       - uses: actions/checkout@v1
       - name: build-container-image
         run: |
+            echo "will see this?" $(git log --oneline -n1)
+            echo "can I see the env" $(env)
+            echo "path to ENV file:" $GITHUB_ENV_PATH
+            echo "Will I see output of cat'ing this file: " $(cat $GITHUB_ENV_PATH)
+            echo "oh that was fun"
             VERSION=$(curl https://raw.githubusercontent.com/kata-containers/runtime/master/VERSION)
             ARTIFACT_URL="https://github.com/kata-containers/runtime/releases/download/${VERSION}/kata-static-${VERSION}-x86_64.tar.xz"
             echo $(ls)
@@ -34,28 +39,3 @@ jobs:
             docker build --build-arg KATA_ARTIFACTS=kata-static.tar.xz -t katadocker/kata-deploy-ci:${GITHUB_SHA} ./kata-deploy
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker push katadocker/kata-deploy-ci:$GITHUB_SHA
-
-  test-on-az:
-    needs: create-test-container
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2-beta
-        with:
-         ref: ${{ github.event.after }}
-      - name: set-pkg-env
-        run: |
-                echo "will see this?" $(git log -n1)
-                cat $GITHUB_ENV_PATH
-                cat /github/workflow/event.json
-                echo "who hates me and won't let me do what i want for cawe;foiajwefawef" 
-                echo ::set-env name=PKG_SHA::${GITHUB_SHA}
-                ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -N '' 
-      - name: test-kata-deploy-in-aks
-        uses: ./kata-deploy/actions/az
-        env:
-          PKG_SHA: ${{ env.PKG_SHA }}
-          AZ_APPID: ${{ secrets.AZ_APPID }}
-          AZ_PASSWORD: ${{ secrets.AZ_PASSWORD }}
-          AZ_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          AZ_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
-
