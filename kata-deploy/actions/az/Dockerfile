@@ -19,6 +19,6 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s
   && chmod +x ./kubectl \
   && mv ./kubectl /usr/local/bin/kubectl
 
-COPY setup-az.sh test-kata.sh entrypoint.sh /
+COPY setup-k3s.sh test-kata.sh entrypoint.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]

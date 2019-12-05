@@ -9,7 +9,6 @@ set -o pipefail
 set -o nounset
 
 LOCATION=${LOCATION:-westus2}
-#DNS_PREFIX=${DNS_PREFIX:-kata-deploy-${GITHUB_SHA:0:10}}
 DNS_PREFIX=${DNS_PREFIX:-kata-deploy-${GITHUB_SHA:0:10}}
 
 function die() {

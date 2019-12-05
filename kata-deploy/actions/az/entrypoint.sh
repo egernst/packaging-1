@@ -15,10 +15,10 @@ echo "provided package reference: ${PKG_SHA}"
 
 # Since this is the entrypoint for the container image, we know that the AKS and Kata setup/testing
 # scripts are located at root.
-source /setup-az.sh
+source /setup-k3s.sh
 source /test-kata.sh 
 
-trap destroy_az EXIT
+trap destroy_k3s EXIT
 
-setup_az
+setup_k3s
 test_kata
