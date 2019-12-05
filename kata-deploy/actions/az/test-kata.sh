@@ -96,6 +96,9 @@ function run_test() {
 function test_kata() {
     set -x
 
+    echo $(ls)
+    echo $(pwd)
+
     [[ -z "$PKG_SHA" ]] && die "no PKG_SHA provided"
     echo "$PKG_SHA"
 
