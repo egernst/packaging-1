@@ -41,7 +41,7 @@ function waitForLabelRemoval() {
     while [[ "$wait_time" -gt 0 ]]; do
         # if a node is found which matches node-select, the output will include a column for node name,
         # NAME. Let's look for that 
-        if [[ -z $(kubectl get --request-timeout='30s' nodes --selector katacontainers.io/kata-runtime | grep NAME) ]]
+        if [[ -z $(kubectl get --request-timeout='30s' nodes --selector katacontainers.io/kata-runtime 2>&1 | grep NAME) ]]
         then
             return 0
         else

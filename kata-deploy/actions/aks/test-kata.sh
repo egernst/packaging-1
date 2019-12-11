@@ -17,8 +17,8 @@ function die() {
 
 function waitForProcess() {
     wait_time="$1"
-    sleep_time="$2"
-    cmd="$3"
+    cmd="$2"
+    sleep_time=5
     while [ "$wait_time" -gt 0 ]; do
         if eval "$cmd"; then
             return 0
@@ -35,16 +35,16 @@ function waitForProcess() {
 # timeout expires
 function waitForLabelRemoval() {
     wait_time="$1"
-    sleep_time="$2"
+    sleep_time=5
 
+    echo "waiting for kata-runtime label to be removed"
     while [[ "$wait_time" -gt 0 ]]; do
         # if a node is found which matches node-select, the output will include a column for node name,
         # NAME. Let's look for that 
-        if [[ -z $(kubectl get nodes --selector katacontainers.io/kata-runtime | grep NAME) ]]
+        if [[ -z $(kubectl get nodes --selector katacontainers.io/kata-runtime 2>&1 | grep NAME) ]]
         then
             return 0
         else
-            echo "waiting for kata-runtime label to be removed"
             sleep "$sleep_time"
             wait_time=$((wait_time-sleep_time))
         fi
@@ -55,7 +55,6 @@ function waitForLabelRemoval() {
     echo "failed to cleanup"
     return 1
 }
-
 
 function run_test() {
     YAMLPATH="./kata-deploy"
@@ -82,7 +81,7 @@ function run_test() {
 
       # test pod connectivity:
       kubectl run $busybox_pod --restart=Never --image="$busybox_image" -- wget --timeout=5 "$deployment"
-      waitForProcess "$wait_time" "$sleep_time" "$cmd"
+      waitForProcess "$wait_time" "$cmd"
       kubectl logs "$busybox_pod" | grep "index.html"
       kubectl describe pod "$busybox_pod"
 
@@ -148,9 +147,8 @@ function test_kata() {
     # The cleanup daemonset will run a single time, since it will clear the node-label. Thus, its difficult to
     # check the daemonset's status for completion. instead, let's wait until the kata-runtime labels are removed
     # from all of the worker nodes. If this doesn't happen after 2 minutes, let's fail
-    timeout=20
-    sleeptime=6
-    waitForLabelRemoval $timeout $sleeptime
+    timeout=120
+    waitForLabelRemoval $timeout
 
     kubectl delete -f $YAMLPATH/kata-cleanup/base/kata-cleanup.yaml
 
