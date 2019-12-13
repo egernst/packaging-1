@@ -23,7 +23,6 @@ function die() {
 function destroy_aks() {
     set +x
 
-    export KUBECONFIG="_output/$DNS_PREFIX/kubeconfig/kubeconfig.$LOCATION.json"
     kubectl describe ds -n kube-system kata-deploy || true
     kubectl describe ds -n kube-system kata-cleanup || true
 
@@ -43,7 +42,7 @@ function setup_aks() {
         --location "$LOCATION" --dns-prefix "$DNS_PREFIX" \
         --api-model "$CLUSTER_CONFIG" --force-overwrite
 
-    export KUBECONFIG="_output/$DNS_PREFIX/kubeconfig/kubeconfig.$LOCATION.json"
+    export KUBECONFIG="$PWD/_output/$DNS_PREFIX/kubeconfig/kubeconfig.$LOCATION.json"
 
     # wait for the cluster to be settled:
     kubectl wait --timeout=10m --for=condition=Ready --all nodes
