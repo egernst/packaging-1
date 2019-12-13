@@ -114,7 +114,7 @@ get_kernel() {
 
 	if [[ ${experimental_kernel} == "true" ]]; then
 		kernel_tarball="linux-${version}.tar.gz"
-		curl --fail -OL "https://gitlab.com/virtio-fs/linux/-/archive/${version}/${kernel_tarball}"
+		curl --fail -OL "https://gitlab.com/virtio-fs/linux/-/tags/${version}/${kernel_tarball}"
 		tar xf "${kernel_tarball}"
 		mv "linux-${version}" "${kernel_path}"
 	else
