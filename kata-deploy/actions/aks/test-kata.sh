@@ -103,11 +103,11 @@ function test_kata() {
     #   bits under test are already part of teh action workspace.
     #  2. From kata-containers: when creating a release, the appropriate packaging repository is
     #   not yet part of the workspace, and we will need to clone
-    if [[ ! "packaging" == $(basename `git rev-parse --show-toplevel`) ]]; then
-        #git clone https://github.com/kata-containers/packaging .
+    if [[ ! -d ./kata-deploy ]]; then
+        #git clone https://github.com/kata-containers/packaging packaging
         #cd packaging
-        git clone https://github.com/egernrst/kata-packaging-1 .
-        cd packaging-1
+        git clone https://github.com/egernst/packaging-1 packaging
+        cd packaging
         git checkout $PKG_SHA
     fi
 
@@ -146,7 +146,7 @@ function test_kata() {
     kubectl get pods,nodes --show-labels
 
     # Remove Kata
-    kubectl apply -f $YAMLPATH/kata-deploy/base/kata-deploy.yaml
+    kubectl delete -f $YAMLPATH/kata-deploy/base/kata-deploy.yaml
     kubectl -n kube-system wait --timeout=10m --for=delete -l name=kata-deploy pod
 
     kubectl get pods,nodes --show-labels
@@ -160,9 +160,6 @@ function test_kata() {
     waitForLabelRemoval $timeout
 
     kubectl delete -f $YAMLPATH/kata-cleanup/base/kata-cleanup.yaml
-
-    rm kata-cleanup.yaml
-    rm kata-deploy.yaml
 
     set +x
 }

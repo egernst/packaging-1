@@ -18,7 +18,7 @@ jobs:
         run: |
            echo "The command was '${{ steps.command.outputs.command-name }}' with arguments '${{ steps.command.outputs.command-arguments }}'"
            [[ ${{ steps.command.outputs.command-arguments}} == "kata-deploy" ]]
-  create-test-container:
+  create-and-test-container:
     needs: check_comments
     runs-on: ubuntu-latest
     steps:
@@ -32,6 +32,7 @@ jobs:
         with:
           ref: ${{ steps.get-PR-ref.outputs.pr-ref }}
       - name: build-container-image
+        id: build-container-image
         run: |
             PR_SHA=$(git log --format=format:%H -n1)
             VERSION=$(curl https://raw.githubusercontent.com/kata-containers/runtime/master/VERSION)
@@ -40,28 +41,13 @@ jobs:
             docker build --build-arg KATA_ARTIFACTS=kata-static.tar.xz -t katadocker/kata-deploy-ci:${PR_SHA} ./kata-deploy
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker push katadocker/kata-deploy-ci:$PR_SHA
-  test-k3s:
-    needs: check_comments
-    runs-on: ubuntu-latest
-    steps:
-      - name: get-PR-ref
-        id: get-PR-ref
-        run: |
-            ref=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.url' | sed  's#^.*\/pulls#refs\/pull#' | sed 's#$#\/merge#')
-            echo "reference for PR: " ${ref}
-            echo "##[set-output name=pr-ref;]${ref}"
-      - uses: actions/checkout@v2-beta
+            echo "##[set-output name=pr-sha;]${PR_SHA}"
+      - name: test-kata-deploy-ci-in-aks
+        uses: ./kata-deploy/actions/aks
         with:
-          ref: ${{ steps.get-PR-ref.outputs.pr-ref }}
-      - name: Get package SHA
-        id: get-pkg-sha
-        run: | 
-            PR_SHA=$(git log --format=format:%H -n1)
-            echo "##[set-output name=PR_SHA;]${PR_SHA}"
-      - name: test-kata-deploy-in-k3s
-        uses: ./kata-deploy/actions/k3s
+          packaging-sha: ${{ steps.build-container-image.outputs.pr-sha }}
         env:
-          PKG_SHA: ${{ steps.get-pkg-sha.outputs.PR_SHA }}
+          PKG_SHA: ${{ steps.build-container-image.outputs.pr-sha }}
           AZ_APPID: ${{ secrets.AZ_APPID }}
           AZ_PASSWORD: ${{ secrets.AZ_PASSWORD }}
           AZ_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
