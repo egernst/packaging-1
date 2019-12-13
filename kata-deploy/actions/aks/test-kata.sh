@@ -99,8 +99,16 @@ function test_kata() {
     [[ -z "$PKG_SHA" ]] && die "no PKG_SHA provided"
     echo "$PKG_SHA"
 
-    #kubectl all the things
-    kubectl get pods,nodes --all-namespaces
+    # This action could be called in two contexts:
+    #  1. Packaging workflows: testing in packaging repository, where we assume yaml/packaging
+    #   bits under test are already part of teh action workspace.
+    #  2. From kata-containers: when creating a release, the appropriate packaging repository is
+    #   not yet part of the workspace, and we will need to clone
+    if [[ ! "packaging" == $(git reflog thing  ]]; then
+        git clone https://github.com/kata-containers/packaging .
+        cd packaging
+        git checkout $PKG_SHA
+    fi
 
     YAMLPATH="./kata-deploy"
 
