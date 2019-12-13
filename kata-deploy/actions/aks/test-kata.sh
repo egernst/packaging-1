@@ -19,11 +19,11 @@ function waitForProcess() {
     wait_time="$1"
     cmd="$2"
     sleep_time=5
+    echo "waiting for process $cmd"
     while [ "$wait_time" -gt 0 ]; do
         if eval "$cmd"; then
             return 0
         else
-            echo "waiting"
             sleep "$sleep_time"
             wait_time=$((wait_time-sleep_time))
         fi
@@ -97,16 +97,17 @@ function test_kata() {
     set -x
 
     [[ -z "$PKG_SHA" ]] && die "no PKG_SHA provided"
-    echo "$PKG_SHA"
 
     # This action could be called in two contexts:
     #  1. Packaging workflows: testing in packaging repository, where we assume yaml/packaging
     #   bits under test are already part of teh action workspace.
     #  2. From kata-containers: when creating a release, the appropriate packaging repository is
     #   not yet part of the workspace, and we will need to clone
-    if [[ ! "packaging" == $(git reflog thing  ]]; then
-        git clone https://github.com/kata-containers/packaging .
-        cd packaging
+    if [[ ! "packaging" == $(basename `git rev-parse --show-toplevel`) ]]; then
+        #git clone https://github.com/kata-containers/packaging .
+        #cd packaging
+        git clone https://github.com/egernrst/kata-packaging-1 .
+        cd packaging-1
         git checkout $PKG_SHA
     fi
 
