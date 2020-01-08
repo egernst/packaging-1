@@ -65,7 +65,6 @@ function run_test() {
     busybox_image="busybox"
     cmd="kubectl get pods | grep $busybox_pod | grep Completed"
     wait_time=120
-    sleep_time=3
 
     configurations=("nginx-deployment-qemu" "nginx-deployment-qemu-virtiofs" "nginx-deployment-clh")
     for deployment in "${configurations[@]}"; do
